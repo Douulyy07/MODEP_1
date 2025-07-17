@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reçu - Dossier Soin</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      padding: 20px;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    .receipt-container {
+      background: #ffffff;
+      max-width: 800px;
+      margin: 0 auto;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      padding: 30px 40px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+    }
+
+    .logo-section {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 15px;
+    }
+
+    .company-name {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .company-subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+      font-weight: 400;
+    }
+
+    .document-title {
+      position: relative;
+      z-index: 1;
+      font-size: 28px;
+      font-weight: 600;
+      margin-top: 20px;
+      letter-spacing: 1px;
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .section {
+      margin-bottom: 35px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e40af;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e2e8f0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .info-item {
+      background: #f8fafc;
+      padding: 18px 20px;
+      border-radius: 8px;
+      border-left: 4px solid #3b82f6;
+      transition: all 0.2s ease;
+    }
+
+    .info-item:hover {
+      background: #f1f5f9;
+      transform: translateY(-1px);
+    }
+
+    .info-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      font-size: 16px;
+      font-weight: 500;
+      color: #1e293b;
+    }
+
+    .amount-highlight {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border-left-color: #065f46;
+    }
+
+    .amount-highlight .info-label {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .amount-highlight .info-value {
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .status-item {
+      background: #fef3c7;
+      border-left-color: #f59e0b;
+    }
+
+    .receipt-number {
+      background: #dbeafe;
+      border-left-color: #3b82f6;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, #e2e8f0 50%, transparent 100%);
+      margin: 30px 0;
+    }
+
+    .footer {
+      background: #f8fafc;
+      padding: 25px 40px;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .footer-content {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.8;
+    }
+
+    .footer-title {
+      font-weight: 600;
+      color: #1e40af;
+      margin-bottom: 5px;
+    }
+
+    .print-info {
+      margin-top: 15px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      
+      .receipt-container {
+        box-shadow: none;
+        border: none;
+        max-width: none;
+      }
+      
+      .info-item:hover {
+        transform: none;
+      }
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .content {
+        padding: 25px;
+      }
+      
+      .header {
+        padding: 25px;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .document-title {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt-container">
+    <div class="header">
+      <div class="document-title">REÇU - DOSSIER SOIN</div>
+    </div>
+
+    <div class="content">
+      <div class="section">
+        <div class="section-title">Informations Adhérent</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Nom</div>
+            <div class="info-value">{{ soin.adherent.nom }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Prénom</div>
+            <div class="info-value">{{ soin.adherent.prenom }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Numéro NAX</div>
+            <div class="info-value">{{ soin.adherent.id|stringformat:"06d" }}</div>
+          </div>
+          <div class="info-item receipt-number">
+            <div class="info-label">Numéro de Reçu</div>
+            <div class="info-value">{{ soin.num_recu }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section">
+        <div class="section-title">Détails du Soin</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Date de Début</div>
+            <div class="info-value">{{ soin.date_soin|date:"d/m/Y" }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Date de Fin</div>
+            <div class="info-value">{{ soin.date_fin_soin|date:"d/m/Y" }}</div>
+          </div>
+          <div class="info-item status-item">
+            <div class="info-label">Statut du Dossier</div>
+            <div class="info-value">{{ soin.statut_dossier }}</div>
+          </div>
+          <div class="info-item amount-highlight">
+            <div class="info-label">Montant Total</div>
+            <div class="info-value">{{ soin.montant_dossier }} MAD</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-content">
+        <div class="footer-title">MODEP - Mutuelle de l'office d'exploitation des ports</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
