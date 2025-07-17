@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { adherentsAPI, soinsAPI, cotisationsAPI } from '../services/api';
+import { useRecentActivity } from '../hooks/useRecentActivity';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const { activities, loading: activitiesLoading } = useRecentActivity();
   const [stats, setStats] = useState({
     totalAdherents: 0,
     totalCotisations: 0,
@@ -81,7 +85,8 @@ export default function Dashboard() {
       color: '#3b82f6',
       bgColor: '#dbeafe',
       change: '+12%',
-      changeType: 'positive'
+      changeType: 'positive',
+      path: '/adherents'
     },
     {
       title: 'Total Cotisations',
@@ -90,7 +95,8 @@ export default function Dashboard() {
       color: '#10b981',
       bgColor: '#d1fae5',
       change: '+8%',
-      changeType: 'positive'
+      changeType: 'positive',
+      path: '/cotisations'
     },
     {
       title: 'Total Soins',
@@ -99,7 +105,8 @@ export default function Dashboard() {
       color: '#f59e0b',
       bgColor: '#fef3c7',
       change: '+15%',
-      changeType: 'positive'
+      changeType: 'positive',
+      path: '/soins'
     },
     {
       title: 'Dossiers Reçus',
@@ -108,7 +115,39 @@ export default function Dashboard() {
       color: '#10b981',
       bgColor: '#d1fae5',
       change: '+5%',
-      changeType: 'positive'
+      changeType: 'positive',
+      path: '/soins'
+    }
+  ];
+
+  const quickActions = [
+    {
+      title: 'Ajouter Adhérent',
+      icon: 'bi-person-plus',
+      color: '#10b981',
+      bgColor: '#d1fae5',
+      action: () => navigate('/adherents')
+    },
+    {
+      title: 'Nouveau Dossier Soin',
+      icon: 'bi-heart-pulse',
+      color: '#f59e0b',
+      bgColor: '#fef3c7',
+      action: () => navigate('/soins')
+    },
+    {
+      title: 'Gérer Cotisations',
+      icon: 'bi-credit-card',
+      color: '#3b82f6',
+      bgColor: '#dbeafe',
+      action: () => navigate('/cotisations')
+    },
+    {
+      title: 'Rapports',
+      icon: 'bi-graph-up',
+      color: '#8b5cf6',
+      bgColor: '#ede9fe',
+      action: () => alert('Module rapports à venir')
     }
   ];
 
@@ -130,15 +169,15 @@ export default function Dashboard() {
       {/* Header */}
       <div className="row mb-4">
         <div className="col">
-          <h1 className="display-6 fw-bold text-dark mb-2">Tableau de Bord</h1>
+          <h1 className="display-6 fw-bold mb-2">Tableau de Bord</h1>
           <p className="text-muted fs-5">Vue d'ensemble de votre système de gestion mutualiste</p>
         </div>
         <div className="col-auto">
           <div className="d-flex gap-2">
-            <button className="btn btn-outline-primary">
+            <button className="btn btn-outline-primary" onClick={() => window.print()}>
               <i className="bi bi-download me-2"></i>Exporter
             </button>
-            <button className="btn btn-primary">
+            <button className="btn btn-primary" onClick={fetchDashboardData}>
               <i className="bi bi-arrow-clockwise me-2"></i>Actualiser
             </button>
           </div>
@@ -153,7 +192,9 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="stat-card h-100"
+              className="stat-card h-100 cursor-pointer"
+              onClick={() => navigate(stat.path)}
+              whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
             >
               <div className="d-flex align-items-center justify-content-between mb-3">
                 <div>
@@ -283,52 +324,47 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="card-body">
-              <div className="timeline">
-                {[
-                  {
-                    icon: 'bi-person-plus',
-                    color: '#10b981',
-                    title: 'Nouvel adhérent enregistré',
-                    description: 'Ahmed Benali a été ajouté au système',
-                    time: 'Il y a 2 heures',
-                    bgColor: '#d1fae5'
-                  },
-                  {
-                    icon: 'bi-heart-pulse',
-                    color: '#f59e0b',
-                    title: 'Nouveau dossier de soin',
-                    description: 'Dossier #12345 créé pour Fatima Zahra',
-                    time: 'Il y a 4 heures',
-                    bgColor: '#fef3c7'
-                  },
-                  {
-                    icon: 'bi-credit-card',
-                    color: '#3b82f6',
-                    title: 'Cotisation mise à jour',
-                    description: 'Statut de cotisation modifié pour Mohamed Ali',
-                    time: 'Il y a 6 heures',
-                    bgColor: '#dbeafe'
-                  }
-                ].map((activity, index) => (
-                  <div key={index} className="d-flex align-items-start mb-4">
-                    <div 
-                      className="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0"
-                      style={{ 
-                        width: '40px', 
-                        height: '40px', 
-                        backgroundColor: activity.bgColor 
-                      }}
-                    >
-                      <i className={`${activity.icon} fs-5`} style={{ color: activity.color }}></i>
-                    </div>
-                    <div className="flex-grow-1">
-                      <h6 className="fw-semibold mb-1">{activity.title}</h6>
-                      <p className="text-muted mb-1">{activity.description}</p>
-                      <small className="text-muted">{activity.time}</small>
-                    </div>
+              {activitiesLoading ? (
+                <div className="text-center py-4">
+                  <div className="spinner-border spinner-border-sm text-primary" role="status">
+                    <span className="visually-hidden">Chargement...</span>
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="timeline">
+                  {activities.map((activity, index) => (
+                    <motion.div 
+                      key={activity.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="d-flex align-items-start mb-4"
+                    >
+                      <div 
+                        className="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0"
+                        style={{ 
+                          width: '40px', 
+                          height: '40px', 
+                          backgroundColor: activity.bgColor 
+                        }}
+                      >
+                        <i className={`${activity.icon} fs-5`} style={{ color: activity.color }}></i>
+                      </div>
+                      <div className="flex-grow-1">
+                        <h6 className="fw-semibold mb-1">{activity.title}</h6>
+                        <p className="text-muted mb-1">{activity.description}</p>
+                        <small className="text-muted">{activity.time}</small>
+                      </div>
+                    </motion.div>
+                  ))}
+                  {activities.length === 0 && (
+                    <div className="text-center py-4">
+                      <i className="bi bi-clock-history display-4 text-muted mb-3"></i>
+                      <p className="text-muted">Aucune activité récente</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -342,40 +378,17 @@ export default function Dashboard() {
             </div>
             <div className="card-body">
               <div className="d-grid gap-3">
-                {[
-                  {
-                    title: 'Ajouter Adhérent',
-                    icon: 'bi-person-plus',
-                    color: '#10b981',
-                    bgColor: '#d1fae5',
-                    path: '/adherents'
-                  },
-                  {
-                    title: 'Nouveau Dossier Soin',
-                    icon: 'bi-heart-pulse',
-                    color: '#f59e0b',
-                    bgColor: '#fef3c7',
-                    path: '/soins'
-                  },
-                  {
-                    title: 'Gérer Cotisations',
-                    icon: 'bi-credit-card',
-                    color: '#3b82f6',
-                    bgColor: '#dbeafe',
-                    path: '/cotisations'
-                  },
-                  {
-                    title: 'Rapports',
-                    icon: 'bi-graph-up',
-                    color: '#8b5cf6',
-                    bgColor: '#ede9fe',
-                    path: '/reports'
-                  }
-                ].map((action, index) => (
-                  <button
+                {quickActions.map((action, index) => (
+                  <motion.button
                     key={index}
                     className="btn btn-light text-start p-3 border-0 shadow-sm"
                     style={{ backgroundColor: '#f8fafc' }}
+                    onClick={action.action}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
                   >
                     <div className="d-flex align-items-center">
                       <div 
@@ -393,7 +406,7 @@ export default function Dashboard() {
                       </div>
                       <i className="bi bi-chevron-right ms-auto text-muted"></i>
                     </div>
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>

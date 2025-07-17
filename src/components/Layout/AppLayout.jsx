@@ -1,32 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import ModernSidebar from './ModernSidebar';
+import CollapsibleSidebar from './CollapsibleSidebar';
 import Header from '../Header';
+import UserProfile from '../UserProfile';
 
 export default function AppLayout({ children }) {
   const [darkMode, setDarkMode] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
+  // Gestion du thème sombre
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
       setDarkMode(true);
-      document.documentElement.classList.add('dark');
     }
   }, []);
 
   useEffect(() => {
+    // Appliquer le thème à l'élément HTML
     if (darkMode) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-bs-theme', 'dark');
+      document.body.classList.add('dark-theme');
       localStorage.setItem('theme', 'dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.removeAttribute('data-bs-theme');
+      document.body.classList.remove('dark-theme');
       localStorage.setItem('theme', 'light');
     }
   }, [darkMode]);
 
+  // Gestion responsive
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
+      const mobile = window.innerWidth < 992; // Bootstrap lg breakpoint
+      setIsMobile(mobile);
+      if (mobile) {
         setSidebarCollapsed(true);
       }
     };
@@ -37,23 +48,43 @@ export default function AppLayout({ children }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Écouter l'événement d'ouverture du profil
+  useEffect(() => {
+    const handleOpenProfile = () => setShowProfile(true);
+    window.addEventListener('openProfile', handleOpenProfile);
+    return () => window.removeEventListener('openProfile', handleOpenProfile);
+  }, []);
+
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
+  const toggleTheme = () => {
+    setDarkMode(!darkMode);
+  };
+
   return (
-    <div className="min-vh-100" style={{ backgroundColor: '#f8fafc' }}>
-      <ModernSidebar 
+    <div className={`min-vh-100 ${darkMode ? 'dark-theme' : ''}`}>
+      <CollapsibleSidebar 
         isCollapsed={sidebarCollapsed} 
         onToggle={toggleSidebar}
+        isMobile={isMobile}
       />
       
-      <div className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
+      <div 
+        className="main-content"
+        style={{
+          marginLeft: isMobile ? '0' : (sidebarCollapsed ? '80px' : '280px'),
+          transition: 'margin-left 0.3s ease'
+        }}
+      >
         <Header 
           darkMode={darkMode} 
-          setDarkMode={setDarkMode}
+          setDarkMode={toggleTheme}
           onToggleSidebar={toggleSidebar}
           sidebarCollapsed={sidebarCollapsed}
+          isMobile={isMobile}
+          onOpenProfile={() => setShowProfile(true)}
         />
         
         <main className="p-4">
@@ -62,6 +93,11 @@ export default function AppLayout({ children }) {
           </div>
         </main>
       </div>
+
+      <UserProfile 
+        isOpen={showProfile}
+        onClose={() => setShowProfile(false)}
+      />
     </div>
   );
 }
